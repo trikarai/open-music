@@ -18,4 +18,4 @@ const mapDBtoModel = ({
   updatedAt: updated_at,
 });
 
-module.exports = { mapDBToModel };
+module.exports = { mapDBtoModel };

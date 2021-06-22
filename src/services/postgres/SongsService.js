@@ -3,7 +3,7 @@ const { nanoid } = require("nanoid");
 const InvariantError = require("../../exceptions/InvariantError");
 const NotFoundError = require("../../exceptions/NotFoundError");
 
-const { mapDBToModel } = require("../../utils");
+const { mapDBtoModel } = require("../../utils/index");
 
 class SongsService {
   constructor() {
@@ -16,7 +16,7 @@ class SongsService {
     const updatedAt = insertedAt;
 
     const query = {
-      test: "INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+      text: "INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
       values: [
         id,
         title,
@@ -40,7 +40,7 @@ class SongsService {
   async getSongs() {
     const query = "SELECT * FROM songs";
     const result = await this._pool.query(query);
-    return result.rows.map(mapDBToModel);
+    return result.rows.map(mapDBtoModel);
   }
 
   async getSongById(id) {
@@ -53,7 +53,7 @@ class SongsService {
       throw new NotFoundError("Lagu tidak ditemukan");
     }
 
-    return result.rows.map(mapDBToModel)[0];
+    return result.rows.map(mapDBtoModel)[0];
   }
 
   async editSongById(id, { title, year, performer, genre, duration }) {
