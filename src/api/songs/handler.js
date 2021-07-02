@@ -57,20 +57,38 @@ class SongsHandler {
   }
 
   async getSongsHandler() {
-    const songsData = await this._service.getSongs();
-    const songs = [];
-    songsData.forEach((element) => {
-      songs.push({
-        id: element.id,
-        title: element.title,
-        performer: element.performer,
+    try {
+      const songsData = await this._service.getSongs();
+      const songs = [];
+      songsData.forEach((element) => {
+        songs.push({
+          id: element.id,
+          title: element.title,
+          performer: element.performer,
+        });
       });
-    });
 
-    return {
-      status: "success",
-      data: { songs },
-    };
+      return {
+        status: "success",
+        data: { songs },
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+      // SERVER ERROR
+      const response = h.response({
+        status: "error",
+        message: "Maaf, terjadi kegagalan pada server kami",
+      });
+      response.code(500);
+      console.log(error);
+    }
   }
 
   async getSongByIdHandler(request, h) {
