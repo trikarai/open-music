@@ -26,7 +26,7 @@ class PlaylistsService {
 
   async getPlaylists(owner) {
     const query = {
-      text: "SELECT * FROM playlists WHERE owner = $1",
+      text: "SELECT playlists.id, playlists.name, users.username FROM playlists JOIN users ON playlists.owner = users.id  WHERE owner = $1",
       values: [owner],
     };
     const result = await this._pool.query(query);
