@@ -15,13 +15,17 @@ class PlaylistSongs {
   async addSongToPlaylistHandler(request, h) {
     try {
       this._validator.validateSongPayload(request.payload);
+      const { id: credentialId } = request.auth.credentials;
 
       const { songId } = request.payload;
       const { playlistId } = request.params;
 
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+
       const playlistsongId = await this._service.addSongToPlayist({
         playlistId,
         songId,
+        credentialId,
       });
       const response = h.response({
         status: "success",
@@ -55,7 +59,11 @@ class PlaylistSongs {
 
   async getSongsFromPlaylistHandler(request, h) {
     try {
+      const { id: credentialId } = request.auth.credentials;
       const { playlistId } = request.params;
+
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+
       const songs = await this._service.getPlaylistsongs(playlistId);
 
       return {
@@ -85,8 +93,15 @@ class PlaylistSongs {
 
   async deleteSongsFromPlaylistHandler(request, h) {
     try {
+      const { id: credentialId } = request.auth.credentials;
+
       const { songId } = request.payload;
-      await this._service.deleteSongFromPlaylist(songId);
+      const { playlistId } = request.params;
+
+      await this._service.verifySongExist(songId);
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.deleteSongFromPlaylist({ playlistId, songId });
+
       return {
         status: "success",
         message: "Lagu berhasil dihapus dari playlist",

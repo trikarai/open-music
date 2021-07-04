@@ -81,10 +81,10 @@ class Playlists {
   async deletePlaylistHandler(request, h) {
     try {
       const { id: credentialId } = request.auth.credentials;
-      const { id } = request.params;
+      const { playlistId } = request.params;
 
-      await this._service.verifyPlaylistOwner(id, credentialId);
-      await this._service.deletePlaylist(id);
+      await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      await this._service.deletePlaylist(playlistId);
       return {
         status: "success",
         message: "Playlist berhasil dihapus",
