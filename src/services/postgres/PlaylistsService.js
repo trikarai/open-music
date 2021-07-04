@@ -28,7 +28,10 @@ class PlaylistsService {
   async getPlaylists(owner) {
     const query = {
       // text: "SELECT playlists.id, playlists.name, users.username FROM playlists JOIN users ON playlists.owner = users.id  WHERE owner = $1",
-      text: "SELECT playlists.id, playlists.name, users.username FROM playlists INNER JOIN users ON playlists.owner = users.id LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id WHERE playlists.owner = $1 OR collaborations.user_id = $1",
+      text: `SELECT playlists.id, playlists.name, users.username FROM playlists
+      INNER JOIN users ON playlists.owner = users.id
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
     };
     const result = await this._pool.query(query);
@@ -50,40 +53,28 @@ class PlaylistsService {
 
   async deletePlaylist(id) {
     const query = {
-      text: "DELETE FROM playlists WHERE id = $1",
+      text: "DELETE FROM playlists WHERE id = $1 RETURNING id",
       values: [id],
     };
 
-    await this._pool.query(query);
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Lagu gagal dihapus. Id tidak ditemukan");
+    }
   }
 
-  async verifyPlaylistOwner(id, owner) {
+  async verifyPlaylistOwner(playlistId, credentialId) {
     const query = {
-      text: "SELECT * FROM playlists WHERE id = $1",
-      values: [id],
+      text: "SELECT * FROM playlists where id = $1",
+      values: [playlistId],
     };
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Playlist tidak ditemukan");
+      throw new NotFoundError("Playlists tidak ditemukan");
     }
     const playlist = result.rows[0];
-    if (playlist.owner !== owner) {
+    if (playlist.owner !== credentialId) {
       throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
-    }
-  }
-
-  async verifyPlaylistAccess(playlistId, userId) {
-    try {
-      await this.verifyPlaylistOwner(playlistId, userId);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-      try {
-        await this._collaborationService.verifyCollaborator(playlistId, userId);
-      } catch {
-        throw error;
-      }
     }
   }
 }

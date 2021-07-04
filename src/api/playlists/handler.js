@@ -1,6 +1,6 @@
 const ClientError = require("../../exceptions/ClientError");
 
-class Playlists {
+class PlaylistsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
@@ -80,11 +80,13 @@ class Playlists {
 
   async deletePlaylistHandler(request, h) {
     try {
-      const { id: credentialId } = request.auth.credentials;
       const { playlistId } = request.params;
+      const { id: credentialId } = request.auth.credentials;
 
       await this._service.verifyPlaylistOwner(playlistId, credentialId);
+      
       await this._service.deletePlaylist(playlistId);
+
       return {
         status: "success",
         message: "Playlist berhasil dihapus",
@@ -109,4 +111,4 @@ class Playlists {
   }
 }
 
-module.exports = Playlists;
+module.exports = PlaylistsHandler;
