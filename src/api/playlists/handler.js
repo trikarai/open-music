@@ -50,7 +50,7 @@ class Playlists {
     }
   }
 
-  async getPlaylistsHandler(request) {
+  async getPlaylistsHandler(request, h) {
     try {
       const { id: credentialId } = request.auth.credentials;
 
