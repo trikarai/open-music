@@ -2,6 +2,7 @@ const { Pool } = require("pg");
 const { nanoid } = require("nanoid");
 const InvariantError = require("../../exceptions/InvariantError");
 const NotFoundError = require("../../exceptions/NotFoundError");
+const AuthorizationError = require("../../exceptions/AuthorizationError");
 
 class PlaylistSongsService {
   constructor() {
@@ -33,18 +34,13 @@ class PlaylistSongsService {
     return result.rows;
   }
 
-  async deleteSongFromPlaylist(songId) {
+  async deleteSongFromPlaylist({ playlistId, songId }) {
     const query = {
-      text: "DELETE FROM playlistsongs WHERE song_id = $1",
-      values: [songId],
+      text: "DELETE FROM playlistsongs WHERE playlist_id = $1 AND  song_id = $2",
+      values: [playlistId, songId],
     };
 
-    const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new NotFoundError(
-        "Lagu gagal dihapus dari playlist. Id tidak ditemukan"
-      );
-    }
+    await this._pool.query(query);
   }
 
   async verifySongExist(id) {
@@ -55,7 +51,21 @@ class PlaylistSongsService {
 
     const result = await this._pool.query(query);
     if (!result.rows.length) {
-      throw new NotFoundError("Lagu tidak ditemukan");
+      throw new InvariantError("Lagu tidak ditemukan");
+    }
+  }
+  async verifyPlaylistOwner(id, owner) {
+    const query = {
+      text: "SELECT * FROM playlists WHERE id = $1",
+      values: [id],
+    };
+    const result = await this._pool.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Playlist tidak ditemukan");
+    }
+    const playlist = result.rows[0];
+    if (playlist.owner !== owner) {
+      throw new AuthorizationError("Anda tidak berhak mengakses resource ini");
     }
   }
 }
