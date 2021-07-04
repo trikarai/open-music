@@ -52,10 +52,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new NotFoundError("Playlist gagal dihapus. Id tidak ditemukan");
-    }
+    await this._pool.query(query);
   }
 
   async verifyPlaylistOwner(id, owner) {
