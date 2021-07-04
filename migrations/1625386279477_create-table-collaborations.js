@@ -23,7 +23,6 @@ exports.up = (pgm) => {
     "UNIQUE(playlist_id, user_id)"
   );
 
-  // memberikan constraint foreign key pada kolom playlist_id dan user_id terhadap notes.id dan users.id
   pgm.addConstraint(
     "collaborations",
     "fk_collaborations.playlist_id_playlists.id",
