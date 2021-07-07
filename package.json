@@ -1,6 +1,6 @@
 {
   "name": "open-music-api",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "dicoding open-music-api submission",
   "main": "index.js",
   "scripts": {
