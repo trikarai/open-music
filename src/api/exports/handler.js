@@ -2,7 +2,8 @@ class ExportsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
-    this.postExportPlaylistsHandler = this.postExportPlaylistsHandler.bind(this);
+    this.postExportPlaylistsHandler =
+      this.postExportPlaylistsHandler.bind(this);
   }
 
   async postExportPlaylistsHandler(request, h) {
@@ -11,6 +12,7 @@ class ExportsHandler {
       const message = {
         userId: request.auth.credentials.id,
         targetEmail: request.payload.targetEmail,
+        playlistId: request.params,
       };
 
       await this._service.sendMessage(
