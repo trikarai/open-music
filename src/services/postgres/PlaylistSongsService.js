@@ -5,12 +5,13 @@ const NotFoundError = require("../../exceptions/NotFoundError");
 const AuthorizationError = require("../../exceptions/AuthorizationError");
 
 class PlaylistSongsService {
-  constructor(collaborationService) {
+  constructor(collaborationService, cacheService) {
     this._pool = new Pool();
     this._collaborationService = collaborationService;
+    this._cacheService = cacheService;
   }
 
-  async addSongToPlayist({ playlistId, songId }) {
+  async addSongToPlayist({ playlistId, songId, owner }) {
     this.verifySongExist(songId);
 
     const id = `playlistsong-${nanoid(16)}`;
@@ -23,6 +24,7 @@ class PlaylistSongsService {
     if (!result.rows[0].id) {
       throw new InvariantError("Lagu gagal ditambahkan ke dalam playlist");
     }
+    await this._cacheService.delete(`playlistsongs:${owner}`);
     return result.rows[0].id;
   }
 
@@ -36,10 +38,18 @@ class PlaylistSongsService {
       values: [owner],
     };
     const result = await this._pool.query(query);
-    return result.rows;
+    const mappedResult = result.rows;
+
+    // catatan akan disimpan pada cache sebelum fungsi getPlaylistsongs dikembalikan
+    await this._cacheService.set(
+      `playlistsongs:${owner}`,
+      JSON.stringify(mappedResult)
+    );
+
+    return mappedResult;
   }
 
-  async deleteSongFromPlaylist(playlistId, songId) {
+  async deleteSongFromPlaylist(playlistId, songId, owner) {
     const query = {
       text: "DELETE FROM playlistsongs WHERE playlist_id = $1 AND  song_id = $2 RETURNING id",
       values: [playlistId, songId],
@@ -50,6 +60,7 @@ class PlaylistSongsService {
     if (!result.rows.length) {
       throw new InvariantError("Lagu gagal dihapus. Id tidak ditemukan");
     }
+    await this._cacheService.delete(`playlistsongs:${owner}`);
   }
 
   async verifySongExist(id) {

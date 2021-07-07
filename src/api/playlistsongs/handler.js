@@ -100,7 +100,11 @@ class PlaylistSongs {
 
       await this._service.verifySongExist(songId);
       await this._service.verifyPlaylistAccess(playlistId, credentialId);
-      await this._service.deleteSongFromPlaylist(playlistId, songId);
+      await this._service.deleteSongFromPlaylist(
+        playlistId,
+        songId,
+        credentialId
+      );
 
       return {
         status: "success",
