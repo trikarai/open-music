@@ -4,6 +4,7 @@ require("dotenv").config();
 const Hapi = require("@hapi/hapi");
 const Jwt = require("@hapi/jwt");
 const path = require("path");
+const Inert = require("@hapi/inert");
 
 const ClientError = require("./exceptions/ClientError");
 
@@ -93,6 +94,9 @@ const init = async () => {
     {
       plugin: Jwt,
     },
+    {
+      plugin: Inert,
+    },
   ]);
 
   server.auth.strategy("songsapp_jwt", "jwt", {
@@ -162,6 +166,7 @@ const init = async () => {
       options: {
         service: ProducerService,
         validator: ExportsValidator,
+        playlistsongsService,
       },
     },
     {
