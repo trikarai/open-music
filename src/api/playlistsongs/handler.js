@@ -25,7 +25,6 @@ class PlaylistSongs {
       const playlistsongId = await this._service.addSongToPlayist({
         playlistId,
         songId,
-        credentialId,
       });
       const response = h.response({
         status: "success",
@@ -64,7 +63,10 @@ class PlaylistSongs {
 
       await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
-      const songs = await this._service.getPlaylistsongs(credentialId);
+      const songs = await this._service.getPlaylistsongs(
+        playlistId,
+        credentialId
+      );
 
       return {
         status: "success",
