@@ -21,13 +21,12 @@ class ExportsHandler {
       this._validator.validateExportPlaylistsPayload(request.payload);
 
       const message = {
-        userId: request.auth.credentials.id,
         targetEmail: request.payload.targetEmail,
-        playlistId: request.params,
+        playlistId: playlistId,
       };
 
       await this._service.sendMessage(
-        "export:playlists",
+        "export:playlistsongs",
         JSON.stringify(message)
       );
       const response = h.response({
